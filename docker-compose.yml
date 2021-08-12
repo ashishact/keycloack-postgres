@@ -1,0 +1,43 @@
+version: '3.6'
+
+services:
+    auth_postgres:
+        image: postgres:latest
+        ports:
+            - "5432:5432"
+        restart: always
+        volumes:
+            - auth_postgres_data:/var/lib/postgresql/data
+        environment:
+            POSTGRES_USER: ${POSTGRES_USER}
+            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+            POSTGRES_DB: keycloak
+    keycloak:
+        image: quay.io/keycloak/keycloak:latest
+        environment:
+            DB_USER: ${POSTGRES_USER}
+            DB_PASSWORD: ${POSTGRES_PASSWORD}
+            DB_VENDOR: POSTGRES
+            JDBC_PARAMS: 'connectTimeout=60'
+            DB_ADDR: auth_postgres
+            DB_DATABASE: keycloak
+            KEYCLOAK_USER: admin
+            KEYCLOAK_PASSWORD: admin
+            PROXY_ADDRESS_FORWARDING: "true"
+        ports:
+            - 8081:8080
+        depends_on:
+            - auth_postgres
+    pgadmin:
+        image: dpage/pgadmin4:latest
+        environment:
+            PGADMIN_DEFAULT_EMAIL: act.jnv@gmail.com
+            PGADMIN_DEFAULT_PASSWORD: CI0Ya1Jhny+UqxP9cQKaQg
+            PGADMIN_LISTEN_PORT: 5050
+        ports:
+            - 5050:5050
+        volumes:
+            - pgadmin_data:/var/lib/pgadmin
+volumes:
+    auth_postgres_data:
+    pgadmin_data:
